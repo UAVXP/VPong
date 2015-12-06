@@ -1,0 +1,1 @@
+del %APPDATA%\LOVE\PPing\st.dat
