@@ -1,0 +1,205 @@
+@import url(reset.css);
+#wrapper{
+    width: 1280px;
+    height: 2000px;
+    margin: 0 auto;   
+    /*outline: 1px solid #cc0000;*/
+    background-image: url(../images/Back2.png);
+    position: relative;
+    
+}
+/*--Заголовок--*/
+#TopLine{
+    height: 20px;
+    background-image: url(../images/TopLine.png);
+    background-repeat: repeat-x;
+   /*outline: 1px solid #cc0000;*/
+}
+#Header{
+    height: 50px;
+    width: 1002px;
+    background-image: url(../images/BackLogo.png);
+    left: 140px;
+     /*outline: 1px solid #cc0000;*/
+    position: relative;
+}
+
+#Logo{
+    height: 25px;
+    width: 118px;
+    background-image: url(../images/Logo.png);
+    position: absolute;
+    top: 13px;
+    left: 15px;
+    
+}
+#Logo a{
+    display: block;
+    height: 25px;
+    cursor: pointer;
+   
+}
+/*--Заголовок--*/
+/*--Штука--*/
+#Gether{
+     
+     left:140px;
+     top:90px;
+     width: 1002px;
+     height: 1800px;
+     position: absolute;
+     background-image: url(../images/Gether2.png);
+      /*outline: 1px solid #cc0000;*/
+}
+/*--Штука--*/
+/*--Игра--*/
+#Download{
+    height: 100px;
+    width: 330px;
+    background-image: url(../images/knopka.png);
+    top:550px;
+    left: 400px;
+     /*outline: 1px solid #cc0000;*/
+    position: relative;
+}
+#Download a{
+    display: block;
+    height: 100px;
+    cursor: pointer;
+   
+}
+/*--Игра--*/
+/*--Медиа--*/
+#Images{
+     position: absolute;
+     top: 100px;
+     left: 160px;
+     color: white;
+     font: 32px Arial,sanssans-serif;
+    
+}
+#Image1{
+     position: absolute;
+     top: 140px;
+     left: 200px;
+     width:315px;
+     height: 200px;
+    /* background-image: url(../images/mlp.png);*/
+    
+}
+#Image2{
+    
+     top: 140px;
+     right:300px;
+     width:315px;
+     height: 200px;
+      position: absolute;
+    /* background-image: url(../images/png.png);*/
+    
+}
+#Image3{
+     position: absolute;
+     top: 400px;
+     right:300px;
+     width:315px;
+     height: 200px;
+     position: absolute;
+    /* background-image: url(../images/stwcw.png);*/
+    
+}
+#Image4{
+    position: absolute;
+     top: 400px;
+     left:200px;
+     width:315px;
+     height: 200px;
+     position: absolute;
+    /* background-image: url(../images/stw.png);*/
+    
+}
+
+/*--Медиа--*/
+#Info{
+   font: 32px Arial,sanssans-serif;
+   width: 100px;
+   height: 50px;
+   position: absolute;
+   top: 750px;
+   text-decoration: none;
+   left: 160px; 
+   color: white;
+}
+#Info1{
+   font: 22px Arial,sanssans-serif;
+   width: 100px;
+   height: 50px;
+   position: absolute;
+   top: 800px;
+   text-decoration: none;
+   left: 170px; 
+   color: white;
+}
+/*--Медиа--*/
+/*--Об Игре--*/
+
+#Makers1{
+   font: 32px Arial,sanssans-serif;
+   position: absolute;
+   top: 1000px;
+   left: 160px;
+   text-decoration: none;
+   color: white;
+}
+#Makers {
+   width: 100px;
+   height: 50px;
+   position: absolute;
+   top: 1050px;
+   left: 170px;   
+   text-decoration: none;
+   color: white;
+   font: 22px Arial,sanssans-serif;
+}
+/*--Об Игре--*/
+/*--Связь--*/
+#Call{
+   font: 32px Arial,sanssans-serif;
+   width: 100px;
+   height: 50px;
+   position: absolute;
+   top: 1300px;
+   text-decoration: none;
+   left: 170px; 
+   color: white;
+}
+#Form{
+   font: 22px Arial,sanssans-serif;
+   width: 1000px;
+   height: 50px;
+   position: absolute;
+   top: 1350px;
+   text-decoration: none;
+   left: 170px; 
+   color: white;
+}
+/*--Связь--*/
+/*--Няшка--*/
+#Silka{
+    background-image: url(../images/scrol.png);
+	background-size: 100px 100px;
+    position: absolute;
+ /*   height: 640px;
+    width: 640px;*/
+	height: 100px;
+    width: 100px;
+    top:1500px;
+    left: 540px;
+    /*outline: 1px solid #cc0000;*/
+    position: relative;
+}
+#Silka a{
+    display: block;
+    height: 310px;
+    cursor: pointer;
+}
+/*--Няшка--*/
