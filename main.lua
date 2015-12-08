@@ -1,5 +1,6 @@
 require( "Tserial" )
-loveframes = require( "UI" )
+--loveframes = require( "UI" )
+loveframes = nil
 
 require( "themes" )
 
@@ -18,6 +19,10 @@ SOUNDS.Background = nil
 
 STATE = {}
 STATE.Current = "score" -- Can be "time" or "score"
+
+MODE = {}
+MODE.SERVER = false
+MODE.CLIENT = false
 
 function createResizedImage( width, height )
 	return love.graphics.newQuad( 0, 0, width, height, width, height )
@@ -154,7 +159,30 @@ function setupPhysics()
 	world:setCallbacks( beginContact, endContact )
 end
 
-function love.load()
+function love.load( arg )
+	for k, v in pairs(arg) do
+		print(v)
+	end
+	if arg[2] == "-server" then -- need a loop
+		MODE.SERVER = true
+	--	love.window.minimize( )
+	--	love.window.setMode( 800, 600, {display=1})
+	--	debug.debug()
+		require( "leaf.init" )
+		require( "leaf.console" )
+		leaf.Console:init()
+	else
+		MODE.CLIENT = true
+		loveframes = require( "UI" )
+		setupSomeImages()
+		require( "pui" )
+		scoreFont = love.graphics.newImageFont( "images/score/all2.png", "0123456789" )
+		setupPhysics()
+		local dummyX, dummyY, dflags = love.window.getMode()
+		dflags.fullscreen = SETTINGS.Video.Resolution.Fullscreen
+		resizeAndPosWindow( SETTINGS.Video.Resolution.Width, SETTINGS.Video.Resolution.Height, dflags )
+	end
+	print( MODE.SERVER, MODE.CLIENT )
 --[[	THEMES.MainMenu.Background.Image = love.graphics.newImage(THEMES.MainMenu.Background.ImagePath)
 	THEMES.MainMenu.Background.Width = THEMES.MainMenu.Background.Image:getWidth()
 	THEMES.MainMenu.Background.Height = THEMES.MainMenu.Background.Image:getHeight()
@@ -181,7 +209,7 @@ function love.load()
 	THEMES.Current.Theme.Ball.Width = THEMES.Current.Theme.Ball.Image:getWidth()
 	THEMES.Current.Theme.Ball.Height = THEMES.Current.Theme.Ball.Image:getHeight()]]
 	
-	setupSomeImages()
+--	setupSomeImages() -- upthere
 --[[
 	if love.filesystem.exists( SETTINGS.FilePath ) then
 		for line in love.filesystem.lines(SETTINGS.FilePath) do
@@ -221,11 +249,11 @@ function love.load()
 		love.filesystem.write( SETTINGS.FilePath, Tserial.pack(SETTINGS) )
 	end
 
-	require( "pui" )
+--	require( "pui" ) -- upthere
 	
 --	resizeAndPosWindow( SETTINGS.Video.Resolution.Width, SETTINGS.Video.Resolution.Height )
 	
-	scoreFont = love.graphics.newImageFont( "images/score/all2.png", "0123456789" )
+--	scoreFont = love.graphics.newImageFont( "images/score/all2.png", "0123456789" ) -- upthere
 	
 --[[	if THEMES.Current.Theme.Background.SoundPath and love.filesystem.exists( THEMES.Current.Theme.Background.SoundPath ) then
 		print("MAKE SOME NOISE")
@@ -245,18 +273,19 @@ function love.load()
 --		setupSounds()
 --	end
 	
-	setupPhysics()
+--	setupPhysics() -- upthere
 
 --	isFirstRun = true
 
-	local dummyX, dummyY, dflags = love.window.getMode()
-	dflags.fullscreen = SETTINGS.Video.Resolution.Fullscreen
-	resizeAndPosWindow( SETTINGS.Video.Resolution.Width, SETTINGS.Video.Resolution.Height, dflags )
+-- 			upthere
+--	local dummyX, dummyY, dflags = love.window.getMode()
+--	dflags.fullscreen = SETTINGS.Video.Resolution.Fullscreen
+--	resizeAndPosWindow( SETTINGS.Video.Resolution.Width, SETTINGS.Video.Resolution.Height, dflags )
 	print("LOADED")
 end
 
 --resizeAndPosWindow( SETTINGS.Video.Resolution.Width, SETTINGS.Video.Resolution.Height )
-loveframes.SetState("mainmenu")
+if loveframes then loveframes.SetState("mainmenu") end
 
 function alignPUI()
 	-- UI centerize
@@ -274,7 +303,7 @@ function reloadAll()
 --	love.load()
 	setupSomeImages()
 	print("reloadAll()")
-	if loveframes.GetState() == "none" then
+	if loveframes and loveframes.GetState() == "none" then
 		setupSounds()
 	end
 	setupPhysics()
@@ -398,108 +427,111 @@ maxScoreValue = 50
 scoreValue = 0
 showWinner = false
 function love.update(dt)
+	if MODE.SERVER then
+	--	print("server update")
+	else
+		if not isInMenu then
+		--	local pl = THEMES.Current.Theme.PlatformLeft
+		--	local pr = THEMES.Current.Theme.PlatformRight
+			local pl = LeftPlatform
+			local pr = RightPlatform
+			
+			oldPlatformRightY = pr:getY()
+			oldPlatformLeftY = pl:getY()
 
-	if not isInMenu then
-	--	local pl = THEMES.Current.Theme.PlatformLeft
-	--	local pr = THEMES.Current.Theme.PlatformRight
-		local pl = LeftPlatform
-		local pr = RightPlatform
-		
-		oldPlatformRightY = pr:getY()
-		oldPlatformLeftY = pl:getY()
-
-	--	if canMove( pl, false ) and love.keyboard.isDown("w") then
-	--		pl.Y = pl.Y - 300 *0.05 --* dt
-	--	end
-	--	if canMove( pl, true ) and love.keyboard.isDown("s") then
-	--		pl.Y = pl.Y + 300 *0.05 --* dt
-	--	end
-		if canMove2( pl, false ) and love.keyboard.isDown(SETTINGS.Keyboard.LeftPlatform.MoveUp) then
-		--	pl:setY( pl:getY() - 300 *0.05 --[[* dt]] )
-			pl:setY( pl:getY() - 380 * dt )
-		end
-		if canMove2( pl, true ) and love.keyboard.isDown(SETTINGS.Keyboard.LeftPlatform.MoveDown) then
-		--	pl:setY( pl:getY() + 300 *0.05 --[[* dt]] )
-			pl:setY( pl:getY() + 380 * dt )
-		end
-
-	--	if canMove( pr, false ) and love.keyboard.isDown("up") then
-	--		pr.Y = pr.Y - 300 *0.05 --* dt
-	--	end
-	--	if canMove( pr, true ) and love.keyboard.isDown("down") then
-	--		pr.Y = pr.Y + 300 *0.05 --* dt
-	--	end
-		if canMove2( pr, false ) and love.keyboard.isDown(SETTINGS.Keyboard.RightPlatform.MoveUp) then
-		--	pr:setY( pr:getY() - 300 *0.05 --[[* dt]] )
-			pr:setY( pr:getY() - 380 * dt )
-		end
-		if canMove2( pr, true ) and love.keyboard.isDown(SETTINGS.Keyboard.RightPlatform.MoveDown) then
-		--	pr:setY( pr:getY() + 300 *0.05 --[[* dt]] )
-			pr:setY( pr:getY() + 380 * dt )
-		end
-		
-		local oldLeftGuyScore = leftGuyScore
-		local oldRightGuyScore = rightGuyScore
-		if isBallOutsideOfScreen() then
-		--	love.window.showMessageBox( "Test", "Outside!", "info", false )
-		--	if lastCollisionShape == pr:getUserData() then
-			if lastCollisionShape == "RightPlatform" then
-				leftGuyScore = leftGuyScore + 1
-				lastCollisionShape = ""
-		--	elseif lastCollisionShape == pl:getUserData() then
-			elseif lastCollisionShape == "LeftPlatform" then
-				rightGuyScore = rightGuyScore + 1
-				lastCollisionShape = ""
+		--	if canMove( pl, false ) and love.keyboard.isDown("w") then
+		--		pl.Y = pl.Y - 300 *0.05 --* dt
+		--	end
+		--	if canMove( pl, true ) and love.keyboard.isDown("s") then
+		--		pl.Y = pl.Y + 300 *0.05 --* dt
+		--	end
+			if canMove2( pl, false ) and love.keyboard.isDown(SETTINGS.Keyboard.LeftPlatform.MoveUp) then
+			--	pl:setY( pl:getY() - 300 *0.05 --[[* dt]] )
+				pl:setY( pl:getY() - 380 * dt )
 			end
+			if canMove2( pl, true ) and love.keyboard.isDown(SETTINGS.Keyboard.LeftPlatform.MoveDown) then
+			--	pl:setY( pl:getY() + 300 *0.05 --[[* dt]] )
+				pl:setY( pl:getY() + 380 * dt )
+			end
+
+		--	if canMove( pr, false ) and love.keyboard.isDown("up") then
+		--		pr.Y = pr.Y - 300 *0.05 --* dt
+		--	end
+		--	if canMove( pr, true ) and love.keyboard.isDown("down") then
+		--		pr.Y = pr.Y + 300 *0.05 --* dt
+		--	end
+			if canMove2( pr, false ) and love.keyboard.isDown(SETTINGS.Keyboard.RightPlatform.MoveUp) then
+			--	pr:setY( pr:getY() - 300 *0.05 --[[* dt]] )
+				pr:setY( pr:getY() - 380 * dt )
+			end
+			if canMove2( pr, true ) and love.keyboard.isDown(SETTINGS.Keyboard.RightPlatform.MoveDown) then
+			--	pr:setY( pr:getY() + 300 *0.05 --[[* dt]] )
+				pr:setY( pr:getY() + 380 * dt )
+			end
+			
+			local oldLeftGuyScore = leftGuyScore
+			local oldRightGuyScore = rightGuyScore
+			if isBallOutsideOfScreen() then
+			--	love.window.showMessageBox( "Test", "Outside!", "info", false )
+			--	if lastCollisionShape == pr:getUserData() then
+				if lastCollisionShape == "RightPlatform" then
+					leftGuyScore = leftGuyScore + 1
+					lastCollisionShape = ""
+			--	elseif lastCollisionShape == pl:getUserData() then
+				elseif lastCollisionShape == "LeftPlatform" then
+					rightGuyScore = rightGuyScore + 1
+					lastCollisionShape = ""
+				end
+				resetBall()
+			end
+			
+		--	if leftGuyScore ~= oldLeftGuyScore or rightGuyScore ~= oldRightGuyScore then
+		--		resetBall()
+		--	end
+			
+			world:update(dt)
+		end
+		
+		if madBallsCurTime > 0 and love.timer.getTime() >= madBallsDieTime then
+			cleanMadness()
 			resetBall()
 		end
 		
-	--	if leftGuyScore ~= oldLeftGuyScore or rightGuyScore ~= oldRightGuyScore then
-	--		resetBall()
-	--	end
 		
-		world:update(dt)
-	end
-	
-	if madBallsCurTime > 0 and love.timer.getTime() >= madBallsDieTime then
-		cleanMadness()
-		resetBall()
-	end
-	
-	
---	if love.timer.getTime() >= madBallsFlowDieTime then
---		createFlow()
---		madBallsFlowCurTime = love.timer.getTime()
---		madBallsFlowDieTime = madBallsFlowCurTime + 0.01
---	end
+	--	if love.timer.getTime() >= madBallsFlowDieTime then
+	--		createFlow()
+	--		madBallsFlowCurTime = love.timer.getTime()
+	--		madBallsFlowDieTime = madBallsFlowCurTime + 0.01
+	--	end
 
 
-	if not isFirstRun and loveframes.GetState() == "none" then
-		if STATE.Current == "time" then
-			-- timer countdown
-			if timerValue > 0 then
-				if love.timer.getTime() - timerStart >= 1 then
-					timerValue = timerValue - 1
-					timerStart = love.timer.getTime()
+		if not isFirstRun and loveframes and loveframes.GetState() == "none" then
+			if STATE.Current == "time" then
+				-- timer countdown
+				if timerValue > 0 then
+					if love.timer.getTime() - timerStart >= 1 then
+						timerValue = timerValue - 1
+						timerStart = love.timer.getTime()
+					end
+				else
+					resetBall()
+					showWinner = true
+				--	isInMenu = true
 				end
-			else
-				resetBall()
-				showWinner = true
-			--	isInMenu = true
-			end
-		elseif STATE.Current == "score" then
-			-- max score countdown
-			local maxScore = math.max( leftGuyScore, rightGuyScore )
-			if maxScore >= maxScoreValue then
-				resetBall()
-				showWinner = true
+			elseif STATE.Current == "score" then
+				-- max score countdown
+				local maxScore = math.max( leftGuyScore, rightGuyScore )
+				if maxScore >= maxScoreValue then
+					resetBall()
+					showWinner = true
+				end
 			end
 		end
-	end
 
-	
---	world:update(dt)
-	loveframes.update(dt)
+		
+	--	world:update(dt)
+		if loveframes then loveframes.update(dt) end
+	end
 end
 function randomFloat(lower, greater)
     return lower + math.random()  * (greater - lower);
@@ -529,14 +561,14 @@ function resetBall()
 end
 
 function love.mousepressed(x, y, button)
-    loveframes.mousepressed(x, y, button)
+    if loveframes then loveframes.mousepressed(x, y, button) end
 end
 
 function love.mousereleased(x, y, button)
-    loveframes.mousereleased(x, y, button)
+    if loveframes then loveframes.mousereleased(x, y, button) end
 end
 function love.keypressed(key, unicode)
-	if loveframes.GetState() ~= "mainmenu" then
+	if loveframes and loveframes.GetState() ~= "mainmenu" then
 		if key == "escape" then
 		--	love.event.quit()
 			if not isInMenu then
@@ -557,13 +589,14 @@ function love.keypressed(key, unicode)
 		end
 	end
 
-	loveframes.keypressed(key, unicode)
+	if loveframes then loveframes.keypressed(key, unicode) end
+	if leaf.Console then leaf.Console:keypressed(key, unicode) end
 end
 function love.keyreleased(key)
-    loveframes.keyreleased(key)
+    if loveframes then loveframes.keyreleased(key) end
 end
 function love.textinput(text)
-	loveframes.textinput(text)
+	if loveframes then loveframes.textinput(text) end
 end
 text = ""
 bbodyvel = ""
@@ -640,131 +673,135 @@ function endContact(a, b, c)
 end
 
 function love:draw()
-	if loveframes.GetState() ~= "mainmenu" then
-		local lp = THEMES.Current.Theme.PlatformLeft.Image
-	--	local rp = THEMES.Current.Theme.PlatformRight.Image
-	--	love.graphics.setBackgroundColor(255, 255, 255)
-		if THEMES.Current.Theme.Background.Image ~= nil then
-		--	love.graphics.draw(THEMES.Current.Theme.Background.Image, love.window.getWidth()/2, love.window.getHeight()/2, 0, 1, 1, THEMES.Current.Theme.Background.Width/2, THEMES.Current.Theme.Background.Height/2)
-			local width = love.window.getHeight()/THEMES.Current.Theme.Background.Height
-			local height = width
-		--	print(love.window.getHeight(), width)
-		--	if love.window.getHeight() < width then
-		--		print("not cool!")
-		--		height = height + (love.window.getHeight() - width)
-		--	end
-			love.graphics.draw(THEMES.Current.Theme.Background.Image, love.window.getWidth()/2, love.window.getHeight()/2, 0, width, height, THEMES.Current.Theme.Background.Width/2, THEMES.Current.Theme.Background.Height/2)
-			love.graphics.push("all")
-			love.graphics.setColor( 255, 255, 255, 30 )
-			love.graphics.rectangle("fill", 0, 0, love.window.getWidth(), love.window.getHeight() )
-			love.graphics.pop()
-		else
-		--	love.graphics.setBackgroundColor(150, 150, 150)
-			love.graphics.setBackgroundColor(20, 20, 20)
-		end
-	--	love.graphics.draw(lp, 15, THEMES.Current.Theme.PlatformLeft.Y)
-	--	love.graphics.draw(rp, love.window.getWidth() - 15 - rp:getWidth(), THEMES.Current.Theme.PlatformRight.Y)
-	--	love.graphics.print(THEMES.Current.Theme.PlatformLeft.Y, 100, 200)
-	--	text = tostring(isFirstRun)
-	--	love.graphics.print(text, 5, 25)
-	--	love.graphics.print(bbodyvel, 5, 50)
-	--	love.graphics.print(body:getPosition(), 100, 200)
-	--	love.graphics.print(THEMES.Current.Theme.PlatformRight.Y, love.window.getWidth() - 100, 200)
-		
-		love.graphics.polygon("line", ceiling:getWorldPoints(ceiling_shape:getPoints()))
-		love.graphics.polygon("line", ground:getWorldPoints(ground_shape:getPoints()))
-	--	love.graphics.polygon("line", RightPlatform:getWorldPoints(RightPlatformShape:getPoints()))
-	--	love.graphics.polygon("line", LeftPlatform:getWorldPoints(LeftPlatformShape:getPoints()))
-		love.graphics.draw(THEMES.Current.Theme.Ball.Image, body:getX(), body:getY(), body:getAngle(), 1, 1, THEMES.Current.Theme.Ball.Width/2, THEMES.Current.Theme.Ball.Height/2)
-		for k, v in pairs(madBalls) do
-			if v then
-				love.graphics.draw(THEMES.Current.Theme.Ball.Image, v.body:getX(), v.body:getY(), v.body:getAngle(), 1, 1, THEMES.Current.Theme.Ball.Width/2, THEMES.Current.Theme.Ball.Height/2)
+	if MODE.SERVER then
+		leaf.Console:draw()
+	else
+		if loveframes and loveframes.GetState() ~= "mainmenu" then
+			local lp = THEMES.Current.Theme.PlatformLeft.Image
+		--	local rp = THEMES.Current.Theme.PlatformRight.Image
+		--	love.graphics.setBackgroundColor(255, 255, 255)
+			if THEMES.Current.Theme.Background.Image ~= nil then
+			--	love.graphics.draw(THEMES.Current.Theme.Background.Image, love.window.getWidth()/2, love.window.getHeight()/2, 0, 1, 1, THEMES.Current.Theme.Background.Width/2, THEMES.Current.Theme.Background.Height/2)
+				local width = love.window.getHeight()/THEMES.Current.Theme.Background.Height
+				local height = width
+			--	print(love.window.getHeight(), width)
+			--	if love.window.getHeight() < width then
+			--		print("not cool!")
+			--		height = height + (love.window.getHeight() - width)
+			--	end
+				love.graphics.draw(THEMES.Current.Theme.Background.Image, love.window.getWidth()/2, love.window.getHeight()/2, 0, width, height, THEMES.Current.Theme.Background.Width/2, THEMES.Current.Theme.Background.Height/2)
+				love.graphics.push("all")
+				love.graphics.setColor( 255, 255, 255, 30 )
+				love.graphics.rectangle("fill", 0, 0, love.window.getWidth(), love.window.getHeight() )
+				love.graphics.pop()
+			else
+			--	love.graphics.setBackgroundColor(150, 150, 150)
+				love.graphics.setBackgroundColor(20, 20, 20)
 			end
-		end
-		-- 20 and 43 - is bad!
-		-- Now a better realisation
-		-- 0.8 = 20 / 25 (pixel offset / picture width)
-		-- 0.286 = 43 / 150 (pixel offset / picture width)
-	--	local xroffset, yroffset = (25 * 0.8), (150 * 0.286)
-	--	local xroffset, yroffset = (THEMES.Current.Theme.PlatformLeft.Width * (20 / THEMES.Current.Theme.PlatformLeft.Width)), (THEMES.Current.Theme.PlatformLeft.Height * (43 / THEMES.Current.Theme.PlatformLeft.Height))
-		love.graphics.draw(THEMES.Current.Theme.PlatformRight.Image, RightPlatform:getX(), RightPlatform:getY(), RightPlatform:getAngle(),1,1,THEMES.Current.Theme.PlatformRight.Width/2,THEMES.Current.Theme.PlatformRight.Height/2)
-	--	love.graphics.print("RightPlatform X: "..RightPlatform:getX() - THEMES.Current.Theme.PlatformLeft.Width/2, 100, 220)
-	--	love.graphics.print("RightPlatform Y: "..RightPlatform:getY() - THEMES.Current.Theme.PlatformLeft.Height/2, 100, 235)
-		
-	--	local xloffset, yloffset = (THEMES.Current.Theme.PlatformLeft.Width * (20 / THEMES.Current.Theme.PlatformLeft.Width)), (THEMES.Current.Theme.PlatformLeft.Height * (43 / THEMES.Current.Theme.PlatformLeft.Height))
-	--	love.graphics.draw(THEMES.Current.Theme.PlatformLeft.Image, LeftPlatform:getX() + xloffset, LeftPlatform:getY() - yloffset, LeftPlatform:getAngle(),1,1,32,32)
-	--	love.graphics.draw(THEMES.Current.Theme.PlatformLeft.Image, LeftPlatform:getX(), LeftPlatform:getY(), LeftPlatform:getAngle(),1,1,THEMES.Current.Theme.PlatformLeft.Width/2,THEMES.Current.Theme.PlatformLeft.Height/2)
-		love.graphics.draw(THEMES.Current.Theme.PlatformLeft.Image, LeftPlatform:getX(), LeftPlatform:getY(), LeftPlatform:getAngle(),1,1,THEMES.Current.Theme.PlatformLeft.Width/2,THEMES.Current.Theme.PlatformLeft.Height/2)
-	--	love.graphics.print("LeftPlatform X: "..LeftPlatform:getX() - THEMES.Current.Theme.PlatformLeft.Width/2, 100, 250)
-	--	love.graphics.print("LeftPlatform Y: "..LeftPlatform:getY() - THEMES.Current.Theme.PlatformLeft.Height/2, 100, 265)
-		
-		love.graphics.push("all")
-			love.graphics.setFont( scoreFont )
-		--	love.graphics.setColorMode( "modulate" ) -- Removed in 0.9.0
-		--	love.graphics.setColor( 255, 0, 0, 255 ) -- Not working
-		--	love.graphics.print(rightGuyScore, 20, 400)
-		--	love.graphics.print(leftGuyScore, love.window.getWidth() - 20 - 100, 400)
-		--	local scoreOffset = 250
-		--	local scoreOffset = 50
-			local scoreOffset = 60
-		--	love.graphics.push("all")
-			if THEMES.Current.Theme.DarkTheme then
-				love.graphics.setColor( 255, 255, 255, 100 )
-			--	love.graphics.rectangle( "fill", love.window.getWidth()/2 - 36/2 - scoreOffset - 10, 5, scoreOffset*3.2, 80 )
-				local strWidth = scoreFont:getWidth( tostring(rightGuyScore)..tostring(leftGuyScore).."000" )
-				love.graphics.rectangle( "fill", love.window.getWidth()/2 - strWidth/2, 5, strWidth + 10 + 10, 80 )
-			end
-		--	love.graphics.pop()
-			love.graphics.setColor( 255, 255, 255, 255 )
-			love.graphics.printf(rightGuyScore, love.window.getWidth()/2 - 36/2 - scoreOffset*2, 15, 125, "right") -- 36x60 - one number  -- 125?
-			love.graphics.print(leftGuyScore, love.window.getWidth()/2 - 36/2 + scoreOffset, 15)
-
-			if THEMES.Current.Theme.DarkTheme then
-				love.graphics.setColor( 255, 255, 255, 100 )
-			--	love.graphics.rectangle( "fill", love.window.getWidth()/2 - 36/2 - scoreOffset - 10, 5, scoreOffset*3.2, 80 )
-				local strWidth = scoreFont:getWidth( tostring(rightGuyScore)..tostring(leftGuyScore) )
-				love.graphics.rectangle( "fill", love.window.getWidth() - 50 - 100, love.window.getHeight() - 125 - 10 - 5, 90, 40 )
-			end
-			love.graphics.setColor( 255, 255, 255, 255 )
-			local valueToShow = ""
-			if STATE.Current == "time" then
-				valueToShow = timerValue
-			elseif STATE.Current == "score" then
-			--	valueToShow = maxScoreValue - math.max( leftGuyScore, rightGuyScore )
-				valueToShow = maxScoreValue - (leftGuyScore + rightGuyScore)
-			end
-			love.graphics.printf(valueToShow, love.window.getWidth() - 125, love.window.getHeight() - 125 - 10, 125, "right", 0, 0.5, 0.5)
-		love.graphics.pop()
-		
-		if isFirstRun then
-			love.graphics.draw( startGameImage, love.window.getWidth()/2 - startGameImage:getWidth()/2, love.window.getHeight() - startGameImage:getHeight() - 50, 0, 1, 1, 0, 0)
-		end
-		
-		if showWinner then
-			local winnerName = "No one"
-			if (STATE.Current == "time") or (STATE.Current == "score") then
-				if rightGuyScore > leftGuyScore then
-					winnerName = "Left Guy" -- "Right Guy loses"
-				elseif rightGuyScore < leftGuyScore then
-					winnerName = "Right Guy" -- "Left Guy loses"
+		--	love.graphics.draw(lp, 15, THEMES.Current.Theme.PlatformLeft.Y)
+		--	love.graphics.draw(rp, love.window.getWidth() - 15 - rp:getWidth(), THEMES.Current.Theme.PlatformRight.Y)
+		--	love.graphics.print(THEMES.Current.Theme.PlatformLeft.Y, 100, 200)
+		--	text = tostring(isFirstRun)
+		--	love.graphics.print(text, 5, 25)
+		--	love.graphics.print(bbodyvel, 5, 50)
+		--	love.graphics.print(body:getPosition(), 100, 200)
+		--	love.graphics.print(THEMES.Current.Theme.PlatformRight.Y, love.window.getWidth() - 100, 200)
+			
+			love.graphics.polygon("line", ceiling:getWorldPoints(ceiling_shape:getPoints()))
+			love.graphics.polygon("line", ground:getWorldPoints(ground_shape:getPoints()))
+		--	love.graphics.polygon("line", RightPlatform:getWorldPoints(RightPlatformShape:getPoints()))
+		--	love.graphics.polygon("line", LeftPlatform:getWorldPoints(LeftPlatformShape:getPoints()))
+			love.graphics.draw(THEMES.Current.Theme.Ball.Image, body:getX(), body:getY(), body:getAngle(), 1, 1, THEMES.Current.Theme.Ball.Width/2, THEMES.Current.Theme.Ball.Height/2)
+			for k, v in pairs(madBalls) do
+				if v then
+					love.graphics.draw(THEMES.Current.Theme.Ball.Image, v.body:getX(), v.body:getY(), v.body:getAngle(), 1, 1, THEMES.Current.Theme.Ball.Width/2, THEMES.Current.Theme.Ball.Height/2)
 				end
 			end
-			local winnerStr = winnerName.." wins!"
-		--	local winStrWidth = Font:getWidth( winnerStr )
-			love.graphics.print(winnerStr, 15, love.window.getHeight() - 50)
-		end
-		
-	--	love.graphics.setColor( 0, 0, 0, 255 )
-	--	love.graphics.print( "", x, y, r, sx, sy, ox, oy, kx, ky )
+			-- 20 and 43 - is bad!
+			-- Now a better realisation
+			-- 0.8 = 20 / 25 (pixel offset / picture width)
+			-- 0.286 = 43 / 150 (pixel offset / picture width)
+		--	local xroffset, yroffset = (25 * 0.8), (150 * 0.286)
+		--	local xroffset, yroffset = (THEMES.Current.Theme.PlatformLeft.Width * (20 / THEMES.Current.Theme.PlatformLeft.Width)), (THEMES.Current.Theme.PlatformLeft.Height * (43 / THEMES.Current.Theme.PlatformLeft.Height))
+			love.graphics.draw(THEMES.Current.Theme.PlatformRight.Image, RightPlatform:getX(), RightPlatform:getY(), RightPlatform:getAngle(),1,1,THEMES.Current.Theme.PlatformRight.Width/2,THEMES.Current.Theme.PlatformRight.Height/2)
+		--	love.graphics.print("RightPlatform X: "..RightPlatform:getX() - THEMES.Current.Theme.PlatformLeft.Width/2, 100, 220)
+		--	love.graphics.print("RightPlatform Y: "..RightPlatform:getY() - THEMES.Current.Theme.PlatformLeft.Height/2, 100, 235)
+			
+		--	local xloffset, yloffset = (THEMES.Current.Theme.PlatformLeft.Width * (20 / THEMES.Current.Theme.PlatformLeft.Width)), (THEMES.Current.Theme.PlatformLeft.Height * (43 / THEMES.Current.Theme.PlatformLeft.Height))
+		--	love.graphics.draw(THEMES.Current.Theme.PlatformLeft.Image, LeftPlatform:getX() + xloffset, LeftPlatform:getY() - yloffset, LeftPlatform:getAngle(),1,1,32,32)
+		--	love.graphics.draw(THEMES.Current.Theme.PlatformLeft.Image, LeftPlatform:getX(), LeftPlatform:getY(), LeftPlatform:getAngle(),1,1,THEMES.Current.Theme.PlatformLeft.Width/2,THEMES.Current.Theme.PlatformLeft.Height/2)
+			love.graphics.draw(THEMES.Current.Theme.PlatformLeft.Image, LeftPlatform:getX(), LeftPlatform:getY(), LeftPlatform:getAngle(),1,1,THEMES.Current.Theme.PlatformLeft.Width/2,THEMES.Current.Theme.PlatformLeft.Height/2)
+		--	love.graphics.print("LeftPlatform X: "..LeftPlatform:getX() - THEMES.Current.Theme.PlatformLeft.Width/2, 100, 250)
+		--	love.graphics.print("LeftPlatform Y: "..LeftPlatform:getY() - THEMES.Current.Theme.PlatformLeft.Height/2, 100, 265)
+			
+			love.graphics.push("all")
+				love.graphics.setFont( scoreFont )
+			--	love.graphics.setColorMode( "modulate" ) -- Removed in 0.9.0
+			--	love.graphics.setColor( 255, 0, 0, 255 ) -- Not working
+			--	love.graphics.print(rightGuyScore, 20, 400)
+			--	love.graphics.print(leftGuyScore, love.window.getWidth() - 20 - 100, 400)
+			--	local scoreOffset = 250
+			--	local scoreOffset = 50
+				local scoreOffset = 60
+			--	love.graphics.push("all")
+				if THEMES.Current.Theme.DarkTheme then
+					love.graphics.setColor( 255, 255, 255, 100 )
+				--	love.graphics.rectangle( "fill", love.window.getWidth()/2 - 36/2 - scoreOffset - 10, 5, scoreOffset*3.2, 80 )
+					local strWidth = scoreFont:getWidth( tostring(rightGuyScore)..tostring(leftGuyScore).."000" )
+					love.graphics.rectangle( "fill", love.window.getWidth()/2 - strWidth/2, 5, strWidth + 10 + 10, 80 )
+				end
+			--	love.graphics.pop()
+				love.graphics.setColor( 255, 255, 255, 255 )
+				love.graphics.printf(rightGuyScore, love.window.getWidth()/2 - 36/2 - scoreOffset*2, 15, 125, "right") -- 36x60 - one number  -- 125?
+				love.graphics.print(leftGuyScore, love.window.getWidth()/2 - 36/2 + scoreOffset, 15)
 
-	--	love.graphics.print("FPS: " .. love.timer.getFPS(), 50, 50)
-	--	love.graphics.print("dt: " .. love.timer.getDelta(), 50, 100)
-	else
-		local width = love.window.getHeight()/THEMES.MainMenu.Background.Height
-		local height = width
-	--	love.graphics.draw(THEMES.MainMenu.Background.Image, love.window.getWidth()/2, love.window.getHeight()/2, 0, width, height, THEMES.MainMenu.Background.Width/2, THEMES.MainMenu.Background.Height/2)
-		love.graphics.draw(THEMES.MainMenu.Background.Image, 0, 0, 0, love.window.getWidth()/THEMES.MainMenu.Background.Width, love.window.getHeight()/THEMES.MainMenu.Background.Height, 0, 0)
-	--	love.graphics.draw(THEMES.Current.Theme.Ball.Image, testQuad, 100, 100)
+				if THEMES.Current.Theme.DarkTheme then
+					love.graphics.setColor( 255, 255, 255, 100 )
+				--	love.graphics.rectangle( "fill", love.window.getWidth()/2 - 36/2 - scoreOffset - 10, 5, scoreOffset*3.2, 80 )
+					local strWidth = scoreFont:getWidth( tostring(rightGuyScore)..tostring(leftGuyScore) )
+					love.graphics.rectangle( "fill", love.window.getWidth() - 50 - 100, love.window.getHeight() - 125 - 10 - 5, 90, 40 )
+				end
+				love.graphics.setColor( 255, 255, 255, 255 )
+				local valueToShow = ""
+				if STATE.Current == "time" then
+					valueToShow = timerValue
+				elseif STATE.Current == "score" then
+				--	valueToShow = maxScoreValue - math.max( leftGuyScore, rightGuyScore )
+					valueToShow = maxScoreValue - (leftGuyScore + rightGuyScore)
+				end
+				love.graphics.printf(valueToShow, love.window.getWidth() - 125, love.window.getHeight() - 125 - 10, 125, "right", 0, 0.5, 0.5)
+			love.graphics.pop()
+			
+			if isFirstRun then
+				love.graphics.draw( startGameImage, love.window.getWidth()/2 - startGameImage:getWidth()/2, love.window.getHeight() - startGameImage:getHeight() - 50, 0, 1, 1, 0, 0)
+			end
+			
+			if showWinner then
+				local winnerName = "No one"
+				if (STATE.Current == "time") or (STATE.Current == "score") then
+					if rightGuyScore > leftGuyScore then
+						winnerName = "Left Guy" -- "Right Guy loses"
+					elseif rightGuyScore < leftGuyScore then
+						winnerName = "Right Guy" -- "Left Guy loses"
+					end
+				end
+				local winnerStr = winnerName.." wins!"
+			--	local winStrWidth = Font:getWidth( winnerStr )
+				love.graphics.print(winnerStr, 15, love.window.getHeight() - 50)
+			end
+			
+		--	love.graphics.setColor( 0, 0, 0, 255 )
+		--	love.graphics.print( "", x, y, r, sx, sy, ox, oy, kx, ky )
+
+		--	love.graphics.print("FPS: " .. love.timer.getFPS(), 50, 50)
+		--	love.graphics.print("dt: " .. love.timer.getDelta(), 50, 100)
+		else
+			local width = love.window.getHeight()/THEMES.MainMenu.Background.Height
+			local height = width
+		--	love.graphics.draw(THEMES.MainMenu.Background.Image, love.window.getWidth()/2, love.window.getHeight()/2, 0, width, height, THEMES.MainMenu.Background.Width/2, THEMES.MainMenu.Background.Height/2)
+			love.graphics.draw(THEMES.MainMenu.Background.Image, 0, 0, 0, love.window.getWidth()/THEMES.MainMenu.Background.Width, love.window.getHeight()/THEMES.MainMenu.Background.Height, 0, 0)
+		--	love.graphics.draw(THEMES.Current.Theme.Ball.Image, testQuad, 100, 100)
+		end
+		if loveframes then loveframes.draw() end
 	end
-	loveframes.draw()
 end
