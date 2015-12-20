@@ -1,2 +1,0 @@
-# VPong
-LOVE Lua Game
