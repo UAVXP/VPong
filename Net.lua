@@ -167,7 +167,7 @@ function net:update(dt)
  
                 if ip ~= net.client.ip then return end
                 if port ~= net.client.port then return end
- 
+
  
                 if net.connected then
                         local data = data1
@@ -316,6 +316,7 @@ function net:send( table, cmd, param, id )
         end
  
         if net.SERVER then
+
                 if not net.connected then return end
                 if not id then error( "No ID Supplied In net_send!" ) end
                 if type(table) == "table" then
