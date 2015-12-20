@@ -8,47 +8,30 @@ Net:send( {}, "print", "Hello There Mr. Server!" )
 Plys = {}
 local selfID = ""
 
---[[---------------------------------------------------------
-	Prints a table to the console
------------------------------------------------------------]]
-function PrintTable( t, indent, done )
-	done = done or {}
-	indent = indent or 0
---	local keys = table.GetKeys( t )
-	local keys={}
-	local n=0
-	for k,v in pairs(t) do
-	  n=n+1
-	  keys[n]=k
-	end
-	table.sort( keys, function( a, b )
-		if ( (type(a) == "number") and (type(b) == "number") ) then return a < b end
-		return tostring( a ) < tostring( b )
-	end )
-	for i = 1, #keys do
-		local key = keys[ i ]
-		local value = t[ key ]
-		print( string.rep( "\t", indent ) )
-		if  ( type(value) == "table" and not done[ value ] ) then
-			done[ value ] = true
-		--	print( tostring( key ) .. ":" .. "\n" )
-			print( tostring( key ) .. ":" )
-			PrintTable ( value, indent + 2, done )
-		else
-		--	print( tostring( key ) .. "\t=\t" )
-			print( tostring( key ), "=", tostring( value ) )
-		end
-	end
-end
+-- Initiating
+local PlyInfo = {}
+PlyInfo.pos = {}
+PlyInfo.pos.x = 0
+PlyInfo.pos.y = 0
 
-Net:registerCMD( "setUserID", function( table, parameters, dt )
+Net:registerCMD( "setUserID", function( tbl, parameters, dt )
 	selfID = parameters
+	
+	if PlyInfo ~= nil then
+		print("Sending first info to server")
+		print(PlyInfo)
+		Net:send( {}, "updatePlyInfo", PlyInfo )
+	end
 end )
-Net:registerCMD( "updatePlysInfo", function( table, parameters, dt )
-	local tbl = table
+Net:registerCMD( "updatePlysInfo", function( tbl, parameters, dt )
 	-- Receiving self and others pos
-	if type(tbl) == "table" and Plys ~= tbl then
+	if type(tbl) == "table" --[[and Plys ~= tbl]] then
+	--	print("Updated players info")
 		Plys = tbl
+		tableRemoveKey(Plys, "Command") -- should be key 1
+		tableRemoveKey(Plys, "Param") -- tablelength(Plys)
+	--	table.remove(Plys, 1)
+	--	table.remove(Plys, tablelength(Plys)+1)
 		--[[for k, v in pairs(Plys) do
 			print("1", k, v)
 			if type(v) == "table" then
@@ -65,10 +48,7 @@ Net:registerCMD( "updatePlysInfo", function( table, parameters, dt )
 			print(v)
 		end
 	end]]
-end ) 
-
-local PlyInfo = {}
-PlyInfo.pos = {}
+end )
 
 function client.update(dt)
 	-- Sending info to server
@@ -103,17 +83,18 @@ end
 function love.draw()
 --	love.graphics.setBackgroundColor(255, 255, 255)
 	local text = "Here's should be your Y position (from server)"
-	if Plys[selfID] and Plys[selfID].PlyInfo then
-		text = Plys[selfID].PlyInfo.pos.y
-	end
-	love.graphics.print(text or 0, 5, 25)
-	--[[local i = 0
+--	if Plys[selfID] and Plys[selfID].PlyInfo then
+--		text = Plys[selfID].PlyInfo.pos.y
+--	end
+--	love.graphics.print(text or 0, 5, 25)
+	local i = 0
+	love.graphics.print(tablelength(Plys), 10, 100)
 	for k, v in pairs(Plys) do
-		if v and v.PlyInfo then
+		if v.PlyInfo then
 			love.graphics.print(k..": "..v.PlyInfo.pos.y, 5, 25*i+10)
 			i = i + 1
 		end
-	end]]
+	end
 end
 
 print( "Client initialized" )

@@ -1,6 +1,8 @@
 SERVER = false
 CLIENT = false
 
+require("common")
+
 function love.load( args )
 	if args[2] == "-server" then
 		SERVER = true
