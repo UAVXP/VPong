@@ -13,6 +13,9 @@ local PlyInfo = {}
 PlyInfo.pos = {}
 PlyInfo.pos.x = 0
 PlyInfo.pos.y = 0
+math.randomseed(os.clock()*100000000000)
+PlyInfo.name = "asshole"..math.random(132345, 232345)
+print("setting name to "..PlyInfo.name)
 
 Net:registerCMD( "setUserID", function( tbl, parameters, dt )
 	selfID = parameters
@@ -50,19 +53,28 @@ Net:registerCMD( "updatePlysInfo", function( tbl, parameters, dt )
 	end]]
 end )
 
+--local fixedUpdateTime = 0.02 -- small, but not so many as love.update time
+local fixedUpdateTime = 0.01 -- better, but it should change(?) depends on ping(??)
+previousKeyDownTime = love.timer.getTime() + fixedUpdateTime
 function client.update(dt)
 	-- Sending info to server
 --	PlyInfo.pos.x = (PlyInfo.pos.x or 0) + 1
 --	PlyInfo.pos.y = (PlyInfo.pos.y or 0) - 1
 	PlyInfo.pos.x = 2
 	if love.keyboard.isDown("w") then
-		PlyInfo.pos.y = (PlyInfo.pos.y or 0) + 10 * dt
-		Net:send( {}, "updatePlyInfo", PlyInfo )
+		if love.timer.getTime() >= previousKeyDownTime then
+			PlyInfo.pos.y = (PlyInfo.pos.y or 0) - 380 * dt
+			Net:send( {}, "updatePlyInfo", PlyInfo )
+			previousKeyDownTime = love.timer.getTime() + fixedUpdateTime
+		end
 	--	print("sended up")
 	end
 	if love.keyboard.isDown("s") then
-		PlyInfo.pos.y = (PlyInfo.pos.y or 0) - 10 * dt
-		Net:send( {}, "updatePlyInfo", PlyInfo )
+		if love.timer.getTime() >= previousKeyDownTime then
+			PlyInfo.pos.y = (PlyInfo.pos.y or 0) + 380 * dt
+			Net:send( {}, "updatePlyInfo", PlyInfo )
+			previousKeyDownTime = love.timer.getTime() + fixedUpdateTime
+		end
 	--	print("sended down")
 	end
 --	Net:send( {}, "updatePlyInfo", PlyInfo )
@@ -88,10 +100,14 @@ function love.draw()
 --	end
 --	love.graphics.print(text or 0, 5, 25)
 	local i = 0
-	love.graphics.print(tablelength(Plys), 10, 100)
+--	love.graphics.print(tablelength(Plys), 10, 100)
 	for k, v in pairs(Plys) do
 		if v.PlyInfo then
-			love.graphics.print(k..": "..v.PlyInfo.pos.y, 5, 25*i+10)
+		--	love.graphics.print(k..": "..v.PlyInfo.pos.y, 5, 25*i+10)
+			local posX = 25*i+15
+			local posY = v.PlyInfo.pos.y or 0
+			love.graphics.print(v.PlyInfo.name, posX, posY - 10)
+			love.graphics.rectangle( "fill", posX, posY, 20, 100 )
 			i = i + 1
 		end
 	end

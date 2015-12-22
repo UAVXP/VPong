@@ -24,9 +24,42 @@ Net:registerCMD( "updatePlyInfo", function( tbl, parameters, id, dt )
 		--	print("something changed")
 			Net.users[id].PlyInfo.pos.x = parameters.pos.x or 23
 			Net.users[id].PlyInfo.pos.y = parameters.pos.y or 3553
+			Net.users[id].PlyInfo.name = parameters.name or "unknown"
 		end
 	end
 end )
+
+local function sendUpdate()
+	local Plys = {}
+		
+		for k, v in pairs(Net.users) do
+			-- Collecting all the infos
+			if Plys[k] == nil then
+				Plys[k] = {}
+			end
+		--	if Net.users[k] and Net.users[k].PlyInfo then
+			if v.PlyInfo ~= Plys[k].PlyInfo then
+			--	print("Pos of client "..k..": ", Net.users[k].PlyInfo.pos.x, Net.users[k].PlyInfo.pos.y)
+				
+			--	Plys[k] = Net.users[k]
+			--	Plys[k].PlyInfo = Net.users[k].PlyInfo
+				Plys[k].PlyInfo = {}
+				Plys[k].PlyInfo = v.PlyInfo
+				
+			--	table.removeKey(Plys[k], "ping") -- Removing "ping"
+			--	Net:send( Plys, "updatePlysInfo", "", k )
+			end
+			
+			
+			--	print(v.PlyInfo.pos.x, v.PlyInfo.pos.y)
+		--	Net:send( {}, "updatePlysInfo", Plys, k )
+		end
+		
+		-- Sending to all clients (yes, separate loop!)
+		for k, v in pairs(Net.users) do
+			Net:send( Plys, "updatePlysInfo", "", k )
+		end
+end
 
 function server.update(dt)
 	if hasChanged then
@@ -72,6 +105,10 @@ function Net.event.server.userConnected( id )
 	Net:send( {}, "print", "Hello, you've connected to my server", id )
 	Net:send( {}, "setUserID", id, id )
 end
+
+--function Net.event.server.userDisconnected( id )
+--	sendUpdate() -- broadcasting update
+--end
 
 print( "Server initialized" )
 return server
