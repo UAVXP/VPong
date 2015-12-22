@@ -61,28 +61,36 @@ local function sendUpdate()
 		end
 end
 
+local fixedUpdateTime = 0.01
+previousFixedUpdateTime = love.timer.getTime() + fixedUpdateTime
 function server.update(dt)
+-- not needed
+--	if love.timer.getTime() < previousFixedUpdateTime then
+--		return -- skipping some ticks here too
+--	end
+	previousFixedUpdateTime = love.timer.getTime() + fixedUpdateTime
 	if hasChanged then
 	--	local stime = love.timer.getTime()
 		local Plys = {}
+		local cachedNetUsers = Net.users
 		
-		for k, v in pairs(Net.users) do
+		for k, v in pairs(cachedNetUsers) do
 			-- Collecting all the infos
 			if Plys[k] == nil then
 				Plys[k] = {}
 			end
 		--	if Net.users[k] and Net.users[k].PlyInfo then
-			if v.PlyInfo ~= Plys[k].PlyInfo then
+		--	if v.PlyInfo ~= Plys[k].PlyInfo then -- commented because hasChanged was implemented
 			--	print("Pos of client "..k..": ", Net.users[k].PlyInfo.pos.x, Net.users[k].PlyInfo.pos.y)
 				
 			--	Plys[k] = Net.users[k]
 			--	Plys[k].PlyInfo = Net.users[k].PlyInfo
-				Plys[k].PlyInfo = {}
+			--	Plys[k].PlyInfo = {}
 				Plys[k].PlyInfo = v.PlyInfo
 				
 			--	table.removeKey(Plys[k], "ping") -- Removing "ping"
 			--	Net:send( Plys, "updatePlysInfo", "", k )
-			end
+		--	end
 			
 			
 			--	print(v.PlyInfo.pos.x, v.PlyInfo.pos.y)
@@ -90,7 +98,7 @@ function server.update(dt)
 		end
 		
 		-- Sending to all clients (yes, separate loop!)
-		for k, v in pairs(Net.users) do
+		for k, v in pairs(cachedNetUsers) do
 			Net:send( Plys, "updatePlysInfo", "", k )
 		end
 		
