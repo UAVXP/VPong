@@ -53,19 +53,22 @@ Net:registerCMD( "updatePlysInfo", function( tbl, parameters, dt )
 	end]]
 end )
 
---local fixedUpdateTime = 0.02 -- small, but not so many as love.update time
-local fixedUpdateTime = 0.01 -- better, but it should change(?) depends on ping(??)
+local fixedUpdateTime = 0.02 -- small, but not so many as love.update time
+--local fixedUpdateTime = 0.01 -- better, but it should change(?) depends on ping(??)
 previousKeyDownTime = love.timer.getTime() + fixedUpdateTime
 function client.update(dt)
 	-- Sending info to server
 --	PlyInfo.pos.x = (PlyInfo.pos.x or 0) + 1
 --	PlyInfo.pos.y = (PlyInfo.pos.y or 0) - 1
 	PlyInfo.pos.x = 2
+	local fullDelay = dt/Net.currentPing * fixedUpdateTime*2000
+	fullDelay = (fullDelay ~= math.huge) and fullDelay or fixedUpdateTime
+	--print(fullDelay)
 	if love.keyboard.isDown("w") then
 		if love.timer.getTime() >= previousKeyDownTime then
 			PlyInfo.pos.y = (PlyInfo.pos.y or 0) - 380 * dt
 			Net:send( {}, "updatePlyInfo", PlyInfo )
-			previousKeyDownTime = love.timer.getTime() + fixedUpdateTime
+			previousKeyDownTime = love.timer.getTime() + fullDelay
 		end
 	--	print("sended up")
 	end
@@ -73,7 +76,7 @@ function client.update(dt)
 		if love.timer.getTime() >= previousKeyDownTime then
 			PlyInfo.pos.y = (PlyInfo.pos.y or 0) + 380 * dt
 			Net:send( {}, "updatePlyInfo", PlyInfo )
-			previousKeyDownTime = love.timer.getTime() + fixedUpdateTime
+			previousKeyDownTime = love.timer.getTime() + fullDelay
 		end
 	--	print("sended down")
 	end
