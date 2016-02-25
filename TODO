@@ -1,0 +1,2 @@
+Make server send not the full table, but only changed parts of it
+Also send not the table, but only some changed parameters of users
