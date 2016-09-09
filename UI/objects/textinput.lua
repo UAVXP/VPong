@@ -67,12 +67,20 @@ function newobject:initialize()
 	self.autoscroll = false
 	self.masked = false
 	self.trackindicator = true
+
+	self.down = false
+	self.clickable = true
+	self.enabled = true
+	self.toggleable = false
+	self.toggle = false
+
 	self.OnEnter = nil
 	self.OnTextChanged = nil
 	self.OnFocusGained = nil
 	self.OnFocusLost = nil
 	self.OnCopy = nil
 	self.OnPaste = nil
+	self.OnClick = nil
 	
 end
 
@@ -120,6 +128,18 @@ function newobject:update(dt)
 	local internals = self.internals
 	local repeatrate = self.repeatrate
 	local hover = self.hover
+	local down = self.down
+	
+	if not hover then
+		self.down = false
+		if downobject == self then
+			self.hover = true
+		end
+	else
+		if downobject == self then
+			self.down = true
+		end
+	end
 	
 	-- move to parent if there is a parent
 	if parent ~= base then
@@ -382,6 +402,8 @@ function newobject:mousepressed(x, y, button)
 			if baseparent and baseparent.type == "frame" then
 				baseparent:MakeTop()
 			end
+			
+			self.down = true
 		elseif button == "wu" then
 			if not alt then
 				if focus then
@@ -452,6 +474,82 @@ function newobject:mousereleased(x, y, button)
 	for k, v in ipairs(internals) do
 		v:mousereleased(x, y, button)
 	end
+	
+	local hover = self.hover
+	local down = self.down
+	local clickable = self.clickable
+	local enabled = self.enabled
+	local onclick = self.OnClick
+	
+	if hover and down and clickable and button == "l" then
+		if enabled then
+			if onclick then
+				onclick(self, x, y)
+			end
+			if self.toggleable then
+				local ontoggle = self.OnToggle
+				self.toggle = not self.toggle
+				if ontoggle then
+					ontoggle(self, self.toggle)
+				end
+			end
+		end
+	end
+	
+	self.down = false
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetClickable(bool)
+	- desc: sets whether the object can be clicked or not
+--]]---------------------------------------------------------
+function newobject:SetClickable(bool)
+
+	self.clickable = bool
+	return self
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetClickable(bool)
+	- desc: gets whether the object can be clicked or not
+--]]---------------------------------------------------------
+function newobject:GetClickable()
+
+	return self.clickable
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetClickable(bool)
+	- desc: sets whether or not the object is enabled
+--]]---------------------------------------------------------
+function newobject:SetEnabled(bool)
+
+	self.enabled = bool
+	return self
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetEnabled()
+	- desc: gets whether or not the object is enabled
+--]]---------------------------------------------------------
+function newobject:GetEnabled()
+
+	return self.enabled
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetDown()
+	- desc: gets whether or not the object is currently
+	        being pressed
+--]]---------------------------------------------------------
+function newobject:GetDown()
+
+	return self.down
 	
 end
 

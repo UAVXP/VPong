@@ -558,6 +558,7 @@ function love.keypressed(key, unicode)
 	end
 
 	loveframes.keypressed(key, unicode)
+	PUI:KeyPressed(key, unicode)
 end
 function love.keyreleased(key)
     loveframes.keyreleased(key)

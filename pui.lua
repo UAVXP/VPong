@@ -362,22 +362,78 @@ PUI.settingsTabsTab1.text5:SetPos( 200, 45 )
 PUI.settingsTabsTab1.text6 = loveframes.Create("text", PUI.settingsTabsTab1)
 PUI.settingsTabsTab1.text6:SetText( "Move down:" )
 PUI.settingsTabsTab1.text6:SetPos( 200, 70 )
+
+-- VXP: TODO: Why the fuck did I do this table? I just can do it much easier
+local edits = { {editing = false, key = ""}, {editing = false, key = ""}, {editing = false, key = ""}, {editing = false, key = ""} }
+local whatKeyIsEditing = 1
 PUI.settingsTabsTab1.textinput1 = loveframes.Create("textinput", PUI.settingsTabsTab1)
 PUI.settingsTabsTab1.textinput1:SetPos( 100, 40 )
 PUI.settingsTabsTab1.textinput1:SetWidth( 50 )
 PUI.settingsTabsTab1.textinput1:SetText( SETTINGS.Keyboard.LeftPlatform.MoveUp )
+PUI.settingsTabsTab1.textinput1:SetEditable( false )
+PUI.settingsTabsTab1.textinput1.OnClick = function( object, x, y )
+	object:SetText( "Enter key" )
+	whatKeyIsEditing = 1
+	edits[whatKeyIsEditing].editing = true
+end
+
 PUI.settingsTabsTab1.textinput2 = loveframes.Create("textinput", PUI.settingsTabsTab1)
 PUI.settingsTabsTab1.textinput2:SetPos( 100, 65 )
 PUI.settingsTabsTab1.textinput2:SetWidth( 50 )
 PUI.settingsTabsTab1.textinput2:SetText( SETTINGS.Keyboard.LeftPlatform.MoveDown )
+PUI.settingsTabsTab1.textinput2:SetEditable( false )
+PUI.settingsTabsTab1.textinput2.OnClick = function( object, x, y )
+	object:SetText( "Enter key" )
+	whatKeyIsEditing = 2
+	edits[whatKeyIsEditing].editing = true
+end
+
 PUI.settingsTabsTab1.textinput3 = loveframes.Create("textinput", PUI.settingsTabsTab1)
 PUI.settingsTabsTab1.textinput3:SetPos( 280, 40 )
 PUI.settingsTabsTab1.textinput3:SetWidth( 50 )
 PUI.settingsTabsTab1.textinput3:SetText( SETTINGS.Keyboard.RightPlatform.MoveUp )
+PUI.settingsTabsTab1.textinput3:SetEditable( false )
+PUI.settingsTabsTab1.textinput3.OnClick = function( object, x, y )
+	object:SetText( "Enter key" )
+	whatKeyIsEditing = 3
+	edits[whatKeyIsEditing].editing = true
+end
+
 PUI.settingsTabsTab1.textinput4 = loveframes.Create("textinput", PUI.settingsTabsTab1)
 PUI.settingsTabsTab1.textinput4:SetPos( 280, 65 )
 PUI.settingsTabsTab1.textinput4:SetWidth( 50 )
 PUI.settingsTabsTab1.textinput4:SetText( SETTINGS.Keyboard.RightPlatform.MoveDown )
+PUI.settingsTabsTab1.textinput4:SetEditable( false )
+PUI.settingsTabsTab1.textinput4.OnClick = function( object, x, y )
+	object:SetText( "Enter key" )
+	whatKeyIsEditing = 4
+	edits[whatKeyIsEditing].editing = true
+end
+
+local function un()
+	local number = whatKeyIsEditing
+	local key = edits[whatKeyIsEditing].key
+	if		number == 1 then
+		SETTINGS.Keyboard.LeftPlatform.MoveUp = key
+	elseif	number == 2 then
+		SETTINGS.Keyboard.LeftPlatform.MoveDown = key
+	elseif	number == 3 then
+		SETTINGS.Keyboard.RightPlatform.MoveUp = key
+	elseif	number == 4 then
+		SETTINGS.Keyboard.RightPlatform.MoveDown = key
+	end
+	PUI.settingsTabsTab1["textinput"..number]:SetText( key )
+--	print(PUI.settingsTabsTab1["textinput"..number]:GetText())
+end
+
+function PUI:KeyPressed(key, unicode)
+	if edits[whatKeyIsEditing].editing then
+		edits[whatKeyIsEditing].key = key
+		edits[whatKeyIsEditing].editing = false
+		un( whatKeyIsEditing )
+	end
+end
+
 PUI.settingsTabsTab1.settingsTabsTab1ApplyButton = loveframes.Create("button", PUI.settingsTabsTab1)
 PUI.settingsTabsTab1.settingsTabsTab1ApplyButton:SetText( "Apply" )
 --PUI.settingsTabsTab1.settingsTabsTab1ApplyButton:SetPos( PUI.settingsFrame:GetWidth() - PUI.settingsTabsTab1.settingsTabsTab1ApplyButton:GetWidth() - 10, PUI.settingsFrame:GetHeight() - PUI.settingsTabsTab1.settingsTabsTab1ApplyButton:GetHeight() - 35 )
