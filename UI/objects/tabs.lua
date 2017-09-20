@@ -164,7 +164,7 @@ function newobject:draw()
 		drawfunc(self)
 	end
 	
-	love.graphics.setStencil(stencilfunc)
+	love.graphics.stencil(stencilfunc)
 	
 	for k, v in ipairs(internals) do
 		local col = loveframes.util.BoundingBox(x + self.buttonareax, v.x, self.y, v.y, self.buttonareawidth, v.width, tabheight, v.height)
@@ -173,7 +173,7 @@ function newobject:draw()
 		end
 	end
 	
-	love.graphics.setStencil()
+	love.graphics.stencil( function() end )
 	
 	if #self.children > 0 then
 		self.children[self.tab]:draw()
@@ -211,7 +211,7 @@ function newobject:mousepressed(x, y, button)
 	local tab = self.tab
 	local hover = self.hover
 	
-	if hover and button == "l" then
+	if hover and button == 1 then
 		local baseparent = self:GetBaseParent()
 		if baseparent and baseparent.type == "frame" then
 			baseparent:MakeTop()

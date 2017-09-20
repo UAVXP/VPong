@@ -322,7 +322,7 @@ function newobject:draw()
 		stencilfunc = function() love.graphics.rectangle("fill", x, y, width - 16, height - 16) end
 	end
 	
-	love.graphics.setStencil(stencilfunc)
+	love.graphics.stencil(stencilfunc)
 	
 	if draw then
 		draw(self)
@@ -330,7 +330,7 @@ function newobject:draw()
 		drawfunc(self)
 	end
 	
-	love.graphics.setStencil()
+	love.graphics.stencil( function() end )
 	
 	for k, v in ipairs(internals) do
 		v:draw()
@@ -374,7 +374,7 @@ function newobject:mousepressed(x, y, button)
 	local inputobject = loveframes.inputobject
 	
 	if hover then
-		if button == "l" then
+		if button == 1 then
 			if inputobject ~= self then
 				loveframes.inputobject = self
 			end
@@ -481,7 +481,7 @@ function newobject:mousereleased(x, y, button)
 	local enabled = self.enabled
 	local onclick = self.OnClick
 	
-	if hover and down and clickable and button == "l" then
+	if hover and down and clickable and button == 1 then
 		if enabled then
 			if onclick then
 				onclick(self, x, y)

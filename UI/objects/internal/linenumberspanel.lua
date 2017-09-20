@@ -108,7 +108,7 @@ function newobject:draw()
 	-- set the object's draw order
 	self:SetDrawOrder()
 	
-	love.graphics.setStencil(stencilfunc)
+	love.graphics.stencil(stencilfunc)
 	
 	if draw then
 		draw(self)
@@ -116,7 +116,7 @@ function newobject:draw()
 		drawfunc(self)
 	end
 	
-	love.graphics.setStencil()
+	love.graphics.stencil( function() end )
 	
 end
 
@@ -134,7 +134,7 @@ function newobject:mousepressed(x, y, button)
 	
 	local hover = self.hover
 	
-	if hover and button == "l" then
+	if hover and button == 1 then
 		local baseparent = self:GetBaseParent()
 		if baseparent and baseparent.type == "frame" then
 			baseparent:MakeTop()

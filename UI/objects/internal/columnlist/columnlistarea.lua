@@ -132,7 +132,7 @@ function newobject:draw()
 		drawfunc(self)
 	end
 	
-	love.graphics.setStencil(stencilfunc)
+	love.graphics.stencil(stencilfunc)
 	
 	for k, v in ipairs(self.children) do
 		local col = loveframes.util.BoundingBox(self.x, v.x, self.y, v.y, width, v.width, height, v.height)
@@ -141,7 +141,7 @@ function newobject:draw()
 		end
 	end
 	
-	love.graphics.setStencil()
+	love.graphics.stencil( function() end )
 	
 	for k, v in ipairs(self.internals) do
 		v:draw()
@@ -161,7 +161,7 @@ function newobject:mousepressed(x, y, button)
 
 	local scrollamount = self.mousewheelscrollamount
 	
-	if self.hover and button == "l" then
+	if self.hover and button == 1 then
 		local baseparent = self:GetBaseParent()
 		if baseparent and baseparent.type == "frame" then
 			baseparent:MakeTop()

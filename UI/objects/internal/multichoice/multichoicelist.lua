@@ -173,7 +173,7 @@ function newobject:draw()
 		v:draw()
 	end
 		
-	love.graphics.setStencil(stencilfunc)
+	love.graphics.stencil(stencilfunc)
 		
 	for k, v in ipairs(children) do
 		local col = loveframes.util.BoundingBox(self.x, v.x, self.y, v.y, self.width, v.width, self.height, v.height)
@@ -182,7 +182,7 @@ function newobject:draw()
 		end
 	end
 		
-	love.graphics.setStencil()
+	love.graphics.stencil( function() end )
 	
 	if not draw then
 		drawoverfunc(self)
@@ -215,7 +215,7 @@ function newobject:mousepressed(x, y, button)
 	local children = self.children
 	local scrollamount = self.mousewheelscrollamount
 	
-	if not selfcol and self.canremove and button == "l" then
+	if not selfcol and self.canremove and button == 1 then
 		self:Close()
 	end
 	

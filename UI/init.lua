@@ -242,7 +242,8 @@ function loveframes.mousereleased(x, y, button)
 	base:mousereleased(x, y, button)
 	
 	-- reset the hover object
-	if button == "l" then
+--	if button == 1 then
+	if button == 1 then
 		loveframes.downobject = false
 		loveframes.selectedobject = false
 	end
