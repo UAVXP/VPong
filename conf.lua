@@ -1,9 +1,9 @@
 function love.conf(t)
-	t.identity = "PPing"                   -- The name of the save directory (string)
+	t.identity = "VPong"                   -- The name of the save directory (string)
 --	t.version = "0.9.2"                -- The LOVE version this game was made for (string)
 	t.console = true                  -- Attach a console (boolean, Windows only)
 
-	t.window.title = "PPing"        -- The window title (string)
+	t.window.title = "VPong"        -- The window title (string)
 --	t.window.icon = nil                -- Filepath to an image to use as the window's icon (string)
 --	t.window.width = 1280               -- The window width (number)
 --	t.window.height = 720              -- The window height (number)
