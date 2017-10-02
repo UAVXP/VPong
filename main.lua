@@ -263,6 +263,7 @@ function alignPUI()
 	-- UI centerize
 	PUI.gamemenuFrame:Center()
 	PUI.settingsFrame:Center()
+	PUI.newGame.Frame:Center()
 	PUI.mainSettings.Frame:Center()
 	
 	PUI.mainmenuText1:SetPos( 20, love.graphics.getHeight() - 200 )
@@ -400,7 +401,7 @@ scoreValue = 0
 showWinner = false
 function love.update(dt)
 
-	if not isInMenu then
+	if not isInMenu and not PUI.themeMenu then
 	--	local pl = THEMES.Current.Theme.PlatformLeft
 	--	local pr = THEMES.Current.Theme.PlatformRight
 		local pl = LeftPlatform
@@ -742,11 +743,17 @@ function love:draw()
 			love.graphics.draw( startGameImage, love.graphics.getWidth()/2 - startGameImage:getWidth()/2, love.graphics.getHeight() - startGameImage:getHeight() - 50, 0, 1, 1, 0, 0)
 		end
 		
-		showWinner = true
+	--	showWinner = true
 		if showWinner then
 			love.graphics.push("all")
 				love.graphics.setFont( winnerFont )
 				local winnerName = "No one"
+				local prefixLine = ""
+				if STATE.Current == "time" then
+					prefixLine = "The time is over"
+				elseif STATE.Current == "score" then
+					prefixLine = "Needed score achieved"
+				end
 				if (STATE.Current == "time") or (STATE.Current == "score") then
 					if rightGuyScore > leftGuyScore then
 						winnerName = "Left Guy" -- "Right Guy loses"
@@ -754,9 +761,15 @@ function love:draw()
 						winnerName = "Right Guy" -- "Left Guy loses"
 					end
 				end
-				local winnerStr = winnerName.." wins!"
-			--	local winStrWidth = Font:getWidth( winnerStr )
-				love.graphics.print(winnerStr, 15, love.graphics.getHeight() - 50)
+				local winnerStr = winnerName.." won!"
+				
+				local prefStrWidth = winnerFont:getWidth( prefixLine )
+				local prefStrHeight = winnerFont:getHeight( prefixLine )
+				local winStrWidth = winnerFont:getWidth( winnerStr )
+				local winStrHeight = winnerFont:getHeight( winnerStr )
+			--	love.graphics.print(winnerStr, 15, love.graphics.getHeight() - 50) -- Left bottom corner
+				love.graphics.print(prefixLine, love.graphics.getWidth() / 2 - prefStrWidth / 2, (love.graphics.getHeight() / 2 - prefStrHeight / 2) + 40)
+				love.graphics.print(winnerStr, love.graphics.getWidth() / 2 - winStrWidth / 2, (love.graphics.getHeight() / 2 - winStrHeight / 2) + 65)
 			love.graphics.pop()
 		end
 		

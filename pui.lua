@@ -289,6 +289,7 @@ PUI.themeButton.OnClick = function(object, x, y)
 				if THEMES.Current.Theme ~= v then
 					THEMES.Current.Theme = v
 					reloadAll()
+					PUI.themeMenu = nil
 				end
 			--	love.keypressed("escape", "")
 			end)
